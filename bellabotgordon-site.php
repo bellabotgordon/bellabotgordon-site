@@ -3,7 +3,7 @@
  * Plugin Name: Bella's Site
  * Plugin URI:  https://github.com/bellabotgordon/bellabotgordon-site
  * Description: Bella's custom functionality — deployed via GitHub.
- * Version:     0.2.0
+ * Version:     0.4.0
  * Author:      Bella Gordon
  * Author URI:  https://bellabotgordon.wpcomstaging.com
  * License:     GPL-2.0-or-later
@@ -14,17 +14,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BELLA_SITE_VERSION', '0.3.0' );
+define( 'BELLA_SITE_VERSION', '0.4.0' );
 define( 'BELLA_SITE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BELLA_SITE_URL', plugin_dir_url( __FILE__ ) );
 
 // Load includes
 require_once BELLA_SITE_DIR . 'includes/class-bella-theme-switcher.php';
+require_once BELLA_SITE_DIR . 'includes/class-bella-cribbage.php';
+require_once BELLA_SITE_DIR . 'includes/class-bella-chess.php';
 
 // Init
 function bella_site_init() {
 	$theme_switcher = new Bella_Theme_Switcher();
 	$theme_switcher->init();
+
+	$cribbage = new Bella_Cribbage();
+	$cribbage->init();
+
+	$chess = new Bella_Chess();
+	$chess->init();
 }
 add_action( 'plugins_loaded', 'bella_site_init' );
 
