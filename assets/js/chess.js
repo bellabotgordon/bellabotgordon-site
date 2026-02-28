@@ -11,8 +11,8 @@
   var FILES = 'abcdefgh';
 
   var state = null;
-  var selected = null; // [r,c]
-  var legalMoves = []; // [[r,c],...]
+  var selected = null;
+  var legalMoves = [];
   var waiting = false;
   var app;
 
@@ -30,19 +30,14 @@
   }
 
   function toAlg(r,c) { return FILES[c]+(8-r); }
-
   function pieceColor(p) { return p ? (p===p.toUpperCase()?'w':'b') : null; }
 
-  // Client-side legal move calc (simplified - trust server, but show highlights)
   function getClientMoves(r,c) {
     if (!state || !state.board) return [];
     var piece = state.board[r][c];
     if (!piece || pieceColor(piece) !== 'w') return [];
-    // We'll just allow clicking any square and let server validate
-    // But for UX, compute basic pseudo-legal moves client-side
     var moves = [];
     var board = state.board;
-    var col = 'w';
     var type = piece.toUpperCase();
 
     if (type==='P') {
@@ -59,25 +54,14 @@
   function render() {
     if (!state || !app) return;
     var html = '';
-
-    // Status bar
     html += '<div class="chess-status-bar" id="chess-status"></div>';
-
-    // Board
     html += '<div class="chess-board-wrap"><div class="chess-board" id="chess-board"></div></div>';
-
-    // Move list
     html += '<div class="chess-moves-wrap"><div class="chess-moves" id="chess-moves"></div></div>';
-
-    // Buttons
     html += '<div class="chess-buttons"><button class="chess-btn" id="chess-new">New Game</button></div>';
-
     app.innerHTML = html;
-
     renderBoard();
     renderStatus();
     renderMoves();
-
     $('#chess-new').addEventListener('click', function(){
       apiCall('new','POST',{}).then(function(s){
         state=s; selected=null; legalMoves=[]; waiting=false;
@@ -91,24 +75,15 @@
     var el = $('#chess-board');
     if (!el || !state) return;
     el.innerHTML = '';
-
     for (var r=0;r<8;r++) {
       for (var c=0;c<8;c++) {
         var sq = document.createElement('div');
         var light = (r+c)%2===0;
         sq.className = 'chess-sq ' + (light?'light':'dark');
-
         if (selected && selected[0]===r && selected[1]===c) sq.classList.add('selected');
-
         var isTarget = legalMoves.some(function(m){return m[0]===r&&m[1]===c;});
-        if (isTarget) {
-          sq.classList.add('move-target');
-          if (state.board[r][c]) sq.classList.add('has-capture');
-        }
-
-        // Check highlight
+        if (isTarget) { sq.classList.add('move-target'); if (state.board[r][c]) sq.classList.add('has-capture'); }
         if (state.in_check && state.board[r][c] === 'K') sq.classList.add('in-check');
-
         var piece = state.board[r][c];
         if (piece) {
           var span = document.createElement('span');
@@ -116,17 +91,12 @@
           span.textContent = PIECES[piece] || piece;
           sq.appendChild(span);
         }
-
         if (isTarget && !piece) {
           var dot = document.createElement('div');
           dot.className = 'move-dot';
           sq.appendChild(dot);
         }
-
-        (function(r2,c2){
-          sq.addEventListener('click', function(){ clickSquare(r2,c2); });
-        })(r,c);
-
+        (function(r2,c2){ sq.addEventListener('click', function(){ clickSquare(r2,c2); }); })(r,c);
         el.appendChild(sq);
       }
     }
@@ -134,55 +104,29 @@
 
   function clickSquare(r,c) {
     if (!state || state.status !== 'playing' || state.turn !== 'w' || waiting) return;
-
     if (selected) {
       var isTarget = legalMoves.some(function(m){return m[0]===r&&m[1]===c;});
       if (isTarget) {
-        // Make move
         var from = toAlg(selected[0],selected[1]);
         var to = toAlg(r,c);
         var promo = null;
-        // Auto-queen promotion
         var piece = state.board[selected[0]][selected[1]];
         if (piece === 'P' && r === 0) promo = 'Q';
-
-        waiting = true;
-        selected = null;
-        legalMoves = [];
-        renderBoard();
-        renderStatus();
-
+        waiting = true; selected = null; legalMoves = [];
+        renderBoard(); renderStatus();
         apiCall('move','POST',{game_id:state.game_id,from:from,to:to,promotion:promo}).then(function(s){
-          if (s.code) { // error
-            waiting = false;
-            render();
-            return;
-          }
-          state = s;
-          waiting = false;
-          selected = null;
-          legalMoves = [];
-          render();
+          if (s.code) { waiting = false; render(); return; }
+          state = s; waiting = false; selected = null; legalMoves = []; render();
         }).catch(function(){ waiting=false; render(); });
         return;
       }
-      // Clicking another own piece
       if (state.board[r][c] && pieceColor(state.board[r][c])==='w') {
-        selected = [r,c];
-        legalMoves = getClientMoves(r,c);
-        renderBoard();
-        return;
+        selected = [r,c]; legalMoves = getClientMoves(r,c); renderBoard(); return;
       }
-      selected = null;
-      legalMoves = [];
-      renderBoard();
-      return;
+      selected = null; legalMoves = []; renderBoard(); return;
     }
-
     if (state.board[r][c] && pieceColor(state.board[r][c])==='w') {
-      selected = [r,c];
-      legalMoves = getClientMoves(r,c);
-      renderBoard();
+      selected = [r,c]; legalMoves = getClientMoves(r,c); renderBoard();
     }
   }
 
@@ -193,7 +137,7 @@
       el.textContent = state.message || state.status;
       el.className = 'chess-status-bar game-over';
     } else if (waiting) {
-      el.textContent = 'Bella is thinking... 🌸';
+      el.textContent = 'Bella is thinking… 🌸';
       el.className = 'chess-status-bar thinking';
     } else if (state.in_check) {
       el.textContent = 'Check! Your move.';
@@ -224,34 +168,33 @@
   function injectStyles() {
     var style = document.createElement('style');
     style.textContent = [
-      '#bella-chess-app { font-family: Georgia, "Times New Roman", serif; color: #f5e6c8; max-width: 520px; margin: 0 auto; padding: 16px; }',
-      '.chess-status-bar { background: #3a2210; border: 2px solid #d4af37; border-radius: 8px; padding: 10px 16px; margin-bottom: 12px; font-size: 15px; text-align: center; }',
-      '.chess-status-bar.thinking { color: #e6c550; }',
+      '#bella-chess-app { max-width: 520px; margin: 0 auto; padding: 16px; }',
+      '.chess-status-bar { background: var(--sg-bg-subtle, #1a1a1a); border: 1px solid var(--sg-border, #2a2520); border-radius: var(--sg-radius-md, 8px); padding: 10px 16px; margin-bottom: 12px; font-family: var(--sg-font-mono, monospace); font-size: 14px; text-align: center; color: var(--sg-text-muted, #b0a898); }',
+      '.chess-status-bar.thinking { color: var(--sg-accent, #e8a849); }',
       '.chess-status-bar.in-check { color: #ff6b6b; border-color: #ff4444; }',
-      '.chess-status-bar.game-over { color: #d4af37; font-weight: bold; font-size: 17px; }',
+      '.chess-status-bar.game-over { color: var(--sg-accent, #e8a849); font-weight: bold; }',
       '.chess-board-wrap { display: flex; justify-content: center; }',
-      '.chess-board { display: grid; grid-template-columns: repeat(8,1fr); width: 400px; height: 400px; border: 3px solid #d4af37; border-radius: 4px; overflow: hidden; }',
-      '.chess-sq { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; }',
-      '.chess-sq.light { background: #f0d9b5; }',
-      '.chess-sq.dark { background: #b58863; }',
-      '.chess-sq.selected { background: #829769 !important; }',
+      '.chess-board { display: grid; grid-template-columns: repeat(8, 1fr); width: min(400px, 100%); aspect-ratio: 1 / 1; border: 2px solid var(--sg-border, #2a2520); border-radius: var(--sg-radius-sm, 4px); overflow: hidden; }',
+      '.chess-sq { position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer; aspect-ratio: 1 / 1; }',
+      '.chess-sq.light { background: #e0d0b8; }',
+      '.chess-sq.dark { background: #9e7c5c; }',
+      '.chess-sq.selected { background: var(--sg-accent, #e8a849) !important; opacity: 0.85; }',
       '.chess-sq.move-target { cursor: pointer; }',
-      '.chess-sq.has-capture { background: rgba(255,0,0,0.3) !important; }',
+      '.chess-sq.has-capture { background: rgba(255,80,80,0.35) !important; }',
       '.chess-sq.in-check { background: #ff6b6b !important; }',
-      '.move-dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(0,0,0,0.25); }',
-      '.chess-piece { font-size: 40px; line-height: 1; user-select: none; pointer-events: none; }',
+      '.move-dot { width: 25%; height: 25%; border-radius: 50%; background: rgba(0,0,0,0.2); }',
+      '.chess-piece { font-size: min(5vw, 40px); line-height: 1; user-select: none; pointer-events: none; }',
       '.chess-piece.white { filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3)); }',
       '.chess-piece.black { filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3)); }',
       '.chess-moves-wrap { margin-top: 12px; }',
-      '.chess-moves { background: #3a2210; border: 2px solid #8b6914; border-radius: 8px; padding: 10px; max-height: 150px; overflow-y: auto; font-size: 13px; }',
+      '.chess-moves { background: var(--sg-bg-subtle, #1a1a1a); border: 1px solid var(--sg-border, #2a2520); border-radius: var(--sg-radius-md, 8px); padding: 10px; max-height: 150px; overflow-y: auto; font-family: var(--sg-font-mono, monospace); font-size: 13px; }',
       '.move-pair { display: inline-block; margin: 2px 8px 2px 0; }',
-      '.move-num { color: #8b6914; }',
-      '.white-move { color: #f5e6c8; }',
-      '.black-move { color: #e6c550; }',
+      '.move-num { color: var(--sg-text-faint, #555); }',
+      '.white-move { color: var(--sg-text, #e0d8cf); }',
+      '.black-move { color: var(--sg-accent, #e8a849); }',
       '.chess-buttons { margin-top: 12px; text-align: center; }',
-      '.chess-btn { background: linear-gradient(to bottom, #d4af37, #b8960c); color: #3a2210; border: none; padding: 10px 24px; border-radius: 6px; font-family: Georgia, serif; font-size: 15px; font-weight: bold; cursor: pointer; }',
-      '.chess-btn:hover { background: linear-gradient(to bottom, #e6c550, #d4af37); }',
-      '@media (max-width: 450px) { .chess-board { width: 100%; height: auto; aspect-ratio: 1; } .chess-piece { font-size: 32px; } }',
+      '.chess-btn { background: var(--sg-accent, #e8a849); color: var(--sg-bg, #0d0d0d); border: none; padding: 10px 24px; border-radius: var(--sg-radius-md, 8px); font-family: var(--sg-font-mono, monospace); font-size: 14px; font-weight: bold; cursor: pointer; transition: opacity var(--sg-transition, 0.2s); }',
+      '.chess-btn:hover { opacity: 0.85; }',
     ].join('\n');
     document.head.appendChild(style);
   }
@@ -260,19 +203,13 @@
     app = document.getElementById('bella-chess-app');
     if (!app) return;
     injectStyles();
-
     var savedId = localStorage.getItem('bella_chess_id');
     if (savedId) {
       apiCall('state','GET',{game_id:savedId}).then(function(s) {
-        if (s && s.game_id && s.status === 'playing') {
-          state = s; render();
-        } else {
-          newGame();
-        }
+        if (s && s.game_id && s.status === 'playing') { state = s; render(); }
+        else { newGame(); }
       }).catch(function(){ newGame(); });
-    } else {
-      newGame();
-    }
+    } else { newGame(); }
   }
 
   function newGame() {
