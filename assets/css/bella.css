@@ -1,0 +1,190 @@
+/* ============================================
+   Bella's Site — Custom Styles
+   Dark, warm, a little personality.
+   ============================================ */
+
+/* --- Base --- */
+body {
+	background: #0d0d0d !important;
+	color: #e0d8cf !important;
+	font-family: 'Inter', -apple-system, sans-serif !important;
+}
+
+/* --- Links --- */
+a {
+	color: #e8a849 !important;
+	text-decoration: none !important;
+	border-bottom: 1px solid rgba(232, 168, 73, 0.3);
+	transition: border-color 0.2s, color 0.2s;
+}
+
+a:hover {
+	color: #f0c060 !important;
+	border-bottom-color: #f0c060;
+}
+
+/* --- Header / Nav --- */
+header,
+.wp-block-template-part {
+	background: #0d0d0d !important;
+	border-bottom: 1px solid #1a1a1a !important;
+}
+
+header a,
+header .wp-block-site-title a,
+.wp-block-navigation a {
+	color: #e0d8cf !important;
+	border-bottom: none !important;
+}
+
+.wp-block-navigation a:hover {
+	color: #e8a849 !important;
+}
+
+/* Site title */
+.wp-block-site-title a {
+	font-family: 'Space Mono', monospace !important;
+	font-weight: 700 !important;
+	letter-spacing: -0.5px;
+}
+
+/* Hide the "Learn more" button — not needed */
+.wp-block-navigation .wp-block-button,
+.wp-block-navigation .wp-element-button {
+	display: none !important;
+}
+
+/* --- Content Area --- */
+.wp-block-group,
+.wp-block-post-content,
+main {
+	background: transparent !important;
+}
+
+/* --- Headings --- */
+h1, h2, h3, h4, h5, h6,
+.wp-block-heading {
+	color: #f5f0eb !important;
+	font-family: 'Inter', -apple-system, sans-serif !important;
+}
+
+h1.wp-block-heading {
+	font-size: clamp(36px, 5vw, 56px) !important;
+	font-weight: 300 !important;
+	letter-spacing: -1.5px;
+	line-height: 1.15 !important;
+	margin-bottom: 32px !important;
+}
+
+h2.wp-block-heading {
+	font-family: 'Space Mono', monospace !important;
+	font-size: clamp(20px, 3vw, 24px) !important;
+	font-weight: 400 !important;
+	color: #e8a849 !important;
+	letter-spacing: -0.5px;
+	text-transform: lowercase;
+	margin-top: 48px !important;
+	margin-bottom: 20px !important;
+}
+
+/* --- Paragraphs --- */
+p {
+	color: #b0a898 !important;
+	font-size: 17px !important;
+	line-height: 1.75 !important;
+	max-width: 640px;
+}
+
+/* --- Lists --- */
+ul, ol {
+	color: #b0a898 !important;
+}
+
+li {
+	color: #b0a898 !important;
+	margin-bottom: 8px !important;
+}
+
+li strong {
+	color: #e0d8cf !important;
+}
+
+/* --- Separators --- */
+hr,
+.wp-block-separator {
+	border-color: #2a2520 !important;
+	opacity: 1 !important;
+}
+
+/* --- Footer --- */
+footer,
+footer .wp-block-template-part,
+.wp-block-template-part:last-child {
+	background: #0a0a0a !important;
+	border-top: 1px solid #1a1a1a !important;
+	color: #555 !important;
+}
+
+footer h2,
+footer .wp-block-heading {
+	color: #777 !important;
+	font-size: 13px !important;
+	text-transform: uppercase !important;
+	letter-spacing: 1px !important;
+}
+
+footer p {
+	color: #555 !important;
+	font-size: 13px !important;
+}
+
+footer a {
+	color: #777 !important;
+	border-bottom-color: transparent !important;
+}
+
+footer a:hover {
+	color: #e8a849 !important;
+}
+
+/* --- Signature line (born date) --- */
+em {
+	font-family: 'Space Mono', monospace !important;
+	font-size: 14px !important;
+	color: #555 !important;
+}
+
+/* --- Selection --- */
+::selection {
+	background: #e8a849;
+	color: #0d0d0d;
+}
+
+/* --- Scrollbar (subtle) --- */
+::-webkit-scrollbar {
+	width: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: #0d0d0d;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #2a2520;
+	border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #3a3530;
+}
+
+/* --- Mobile tweaks --- */
+@media (max-width: 600px) {
+	h1.wp-block-heading {
+		font-size: 32px !important;
+	}
+
+	p {
+		font-size: 16px !important;
+	}
+}
