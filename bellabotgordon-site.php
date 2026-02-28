@@ -14,9 +14,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'BELLA_SITE_VERSION', '0.2.0' );
+define( 'BELLA_SITE_VERSION', '0.3.0' );
 define( 'BELLA_SITE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BELLA_SITE_URL', plugin_dir_url( __FILE__ ) );
+
+// Load includes
+require_once BELLA_SITE_DIR . 'includes/class-bella-theme-switcher.php';
+
+// Init
+function bella_site_init() {
+	$theme_switcher = new Bella_Theme_Switcher();
+	$theme_switcher->init();
+}
+add_action( 'plugins_loaded', 'bella_site_init' );
 
 /**
  * Enqueue custom front-end styles.
